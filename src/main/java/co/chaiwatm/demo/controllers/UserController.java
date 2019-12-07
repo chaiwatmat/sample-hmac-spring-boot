@@ -21,21 +21,51 @@ import co.chaiwatm.demo.models.*;
 public class UserController {
 
     @GetMapping
-    public ResponseEntity<GreetingResponse> user() {
+    public ResponseEntity<GenericResponse> user() {
         User me = new User();
         me.setId(1001);
         me.setName("Chaiwat Matarak");
 
-        GreetingResponse greetingResponse = new GreetingResponse();
+        GenericResponse greetingResponse = new GenericResponse<User>();
         greetingResponse.setResponseUid("9c07234b-90cb-4c15-a1b6-d277ddda8aca");
-        greetingResponse.setUser(me);
+        greetingResponse.setData(me);
 
         HttpHeaders headers = GetResponseHeader(greetingResponse);
 
         return new ResponseEntity<>(greetingResponse, headers, HttpStatus.OK);
     }
 
-    private HttpHeaders GetResponseHeader(GreetingResponse greetingResponse) {
+    @GetMapping("/list")
+    public ResponseEntity<GenericResponse> users() {
+        List<User> users = GetUsers();
+
+        GenericResponse response = new GenericResponse<List<User>>();
+        response.setResponseUid("9c07234b-90cb-4c15-a1b6-d277ddda8aca");
+        response.setData(users);
+
+        HttpHeaders headers = GetResponseHeader(response);
+
+        return new ResponseEntity<>(response, headers, HttpStatus.OK);
+    }
+
+    private List<User> GetUsers() {
+        List<User> users = new ArrayList<User>();
+
+        User user1 = new User();
+        user1.setId(1001);
+        user1.setName("Chaiwat Matarak");
+
+        User user2 = new User();
+        user2.setId(1002);
+        user2.setName("John Doe");
+
+        users.add(user1);
+        users.add(user2);
+
+        return users;
+    }
+
+    private HttpHeaders GetResponseHeader(GenericResponse greetingResponse) {
         Gson gson = new GsonBuilder().serializeNulls().create();
         String json = gson.toJson(greetingResponse);
         String xSignature = GetSignature(json);
