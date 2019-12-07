@@ -26,13 +26,13 @@ public class UserController {
         me.setId(1001);
         me.setName("Chaiwat Matarak");
 
-        GenericResponse greetingResponse = new GenericResponse<User>();
-        greetingResponse.setResponseUid("9c07234b-90cb-4c15-a1b6-d277ddda8aca");
-        greetingResponse.setData(me);
+        GenericResponse response = new GenericResponse<User>();
+        response.setResponseUid("9c07234b-90cb-4c15-a1b6-d277ddda8aca");
+        response.setData(me);
 
-        HttpHeaders headers = GetResponseHeader(greetingResponse);
+        HttpHeaders headers = GetResponseHeader(response);
 
-        return new ResponseEntity<>(greetingResponse, headers, HttpStatus.OK);
+        return new ResponseEntity<>(response, headers, HttpStatus.OK);
     }
 
     @GetMapping("/list")
@@ -65,9 +65,9 @@ public class UserController {
         return users;
     }
 
-    private HttpHeaders GetResponseHeader(GenericResponse greetingResponse) {
+    private HttpHeaders GetResponseHeader(GenericResponse response) {
         Gson gson = new GsonBuilder().serializeNulls().create();
-        String json = gson.toJson(greetingResponse);
+        String json = gson.toJson(response);
         String xSignature = GetSignature(json);
 
         HttpHeaders headers = new HttpHeaders();
