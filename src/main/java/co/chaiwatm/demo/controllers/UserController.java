@@ -1,13 +1,18 @@
 package co.chaiwatm.demo.controllers;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
+import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
+import java.security.*;
+import java.util.*;
+import javax.crypto.*;
+import javax.crypto.spec.SecretKeySpec;
 
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import com.google.gson.*;
+import org.springframework.http.*;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.function.ServerRequest.Headers;
 
 import co.chaiwatm.demo.models.*;
 
@@ -20,18 +25,65 @@ public class UserController {
         User me = new User();
         me.setId(1001);
         me.setName("Chaiwat Matarak");
-        // me.setFriend("M");
 
         GreetingResponse greetingResponse = new GreetingResponse();
         greetingResponse.setResponseUid("9c07234b-90cb-4c15-a1b6-d277ddda8aca");
         greetingResponse.setUser(me);
 
+        HttpHeaders headers = GetResponseHeader(greetingResponse);
+
+        return new ResponseEntity<>(greetingResponse, headers, HttpStatus.OK);
+    }
+
+    private HttpHeaders GetResponseHeader(GreetingResponse greetingResponse) {
         Gson gson = new GsonBuilder().serializeNulls().create();
         String json = gson.toJson(greetingResponse);
-        System.out.println(json);
+        String xSignature = GetSignature(json);
 
-        ResponseEntity response = new ResponseEntity<>(greetingResponse, HttpStatus.OK);
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("X-Signature", xSignature);
 
-        return response;
+        return headers;
+    }
+
+    private String GetSignature(String text) {
+        String secret = "8a64c35116e906b79d0763d0354b8a5e7ad31515c0774e8cb9a3e2034fc0219f";
+        // byte[] byteKey = secret.getBytes();
+        byte[] byteKey = hexStringToByteArray(secret);
+        Key key = new SecretKeySpec(byteKey, "HMACSHA512");
+
+        try {
+            Mac hmacSha512 = Mac.getInstance("HMACSHA512");
+            hmacSha512.init(key);
+            byte[] result = hmacSha512.doFinal(text.getBytes());
+
+            return toHexString(result);
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        } catch (InvalidKeyException e) {
+            e.printStackTrace();
+        }
+
+        return "";
+    }
+
+    private static String toHexString(byte[] bytes) {
+        Formatter formatter = new Formatter();
+        for (byte b : bytes) {
+            formatter.format("%02x", b);
+        }
+
+        return formatter.toString();
+    }
+
+    private static byte[] hexStringToByteArray(String s) {
+        int len = s.length();
+        byte[] data = new byte[len / 2];
+
+        for (int i = 0; i < len; i += 2) {
+            data[i / 2] = (byte) ((Character.digit(s.charAt(i), 16) << 4) + Character.digit(s.charAt(i + 1), 16));
+        }
+
+        return data;
     }
 }
