@@ -22,9 +22,8 @@ public class UserController {
 
     @GetMapping
     public ResponseEntity<GenericResponse> user() {
-        User me = new User();
-        me.setId(1001);
-        me.setName("Chaiwat Matarak");
+        List<User> users = GetUsers();
+        User me = users.get(0);
 
         GenericResponse response = new GenericResponse<User>();
         response.setResponseUid("9c07234b-90cb-4c15-a1b6-d277ddda8aca");
