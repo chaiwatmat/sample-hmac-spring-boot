@@ -14,9 +14,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
 import co.chaiwatm.demo.models.*;
-import lombok.*;
 
-@Data
 public class SignatureUtility {
     public static HttpHeaders GetResponseHeader(GenericResponse response) {
         Gson gson = new GsonBuilder().serializeNulls().create();

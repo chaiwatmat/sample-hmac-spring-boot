@@ -12,6 +12,7 @@ import com.google.gson.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -19,6 +20,7 @@ import org.springframework.web.servlet.function.ServerRequest.Headers;
 
 import co.chaiwatm.demo.models.*;
 import co.chaiwatm.demo.services.UserService;
+import co.chaiwatm.demo.utilities.RequestHeaderUtility;
 import co.chaiwatm.demo.utilities.SignatureUtility;
 
 @RestController
@@ -33,12 +35,13 @@ public class UserController {
     }
 
     @GetMapping("/get")
-    public ResponseEntity<GenericResponse> user() {
+    public ResponseEntity<GenericResponse> user(@RequestHeader Map<String, String> requestHeaders) {
+        RequestHeaderModel headerModel = RequestHeaderUtility.GetHeaders(requestHeaders);
         List<User> users = userService.list();
         User me = users.get(0);
 
         GenericResponse response = new GenericResponse<User>();
-        response.setResponseUid("9c07234b-90cb-4c15-a1b6-d277ddda8aca");
+        response.setResponseUid(headerModel.getRequestuid());
         response.setData(me);
 
         HttpHeaders headers = SignatureUtility.GetResponseHeader(response);
@@ -47,11 +50,11 @@ public class UserController {
     }
 
     @GetMapping
-    public ResponseEntity<GenericResponse> users() {
+    public ResponseEntity<GenericResponse> users(@RequestHeader Map<String, String> requestHeaders) {
+        RequestHeaderModel headerModel = RequestHeaderUtility.GetHeaders(requestHeaders);
         List<User> users = userService.list();
-
         GenericResponse response = new GenericResponse<List<User>>();
-        response.setResponseUid("9c07234b-90cb-4c15-a1b6-d277ddda8aca");
+        response.setResponseUid(headerModel.getRequestuid());
         response.setData(users);
 
         HttpHeaders headers = SignatureUtility.GetResponseHeader(response);
