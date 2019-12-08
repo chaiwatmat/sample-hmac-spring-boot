@@ -15,14 +15,17 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.function.ServerRequest.Headers;
 
 import co.chaiwatm.demo.models.*;
+import co.chaiwatm.demo.services.UserService;
 
 @RestController
 @RequestMapping("/users")
 public class UserController {
 
-    @GetMapping
-    public ResponseEntity<GenericResponse> user() {
-        List<User> users = GetUsers();
+    private UserService userService;
+
+    @GetMapping("/{userId}")
+    public ResponseEntity<GenericResponse> user(int userId) {
+        List<User> users = userService.list();
         User me = users.get(0);
 
         GenericResponse response = new GenericResponse<User>();
@@ -31,12 +34,12 @@ public class UserController {
 
         HttpHeaders headers = GetResponseHeader(response);
 
-        return new ResponseEntity<>(response, headers, HttpStatus.OK);
+        return ResponseEntity.ok().headers(headers).body(response);
     }
 
-    @GetMapping("/list")
+    @GetMapping
     public ResponseEntity<GenericResponse> users() {
-        List<User> users = GetUsers();
+        List<User> users = userService.list();
 
         GenericResponse response = new GenericResponse<List<User>>();
         response.setResponseUid("9c07234b-90cb-4c15-a1b6-d277ddda8aca");
@@ -45,23 +48,6 @@ public class UserController {
         HttpHeaders headers = GetResponseHeader(response);
 
         return new ResponseEntity<>(response, headers, HttpStatus.OK);
-    }
-
-    private List<User> GetUsers() {
-        List<User> users = new ArrayList<User>();
-
-        User user1 = new User();
-        user1.setId(1001);
-        user1.setName("Chaiwat Matarak");
-
-        User user2 = new User();
-        user2.setId(1002);
-        user2.setName("John Doe");
-
-        users.add(user1);
-        users.add(user2);
-
-        return users;
     }
 
     private HttpHeaders GetResponseHeader(GenericResponse response) {
