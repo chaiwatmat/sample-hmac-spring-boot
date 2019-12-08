@@ -3,10 +3,12 @@ package co.chaiwatm.demo.services;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.stereotype.Service;
+
 import co.chaiwatm.demo.models.User;
 import lombok.*;
 
-@Data
+@Service
 public class UserService {
 
     public List<User> list() {
