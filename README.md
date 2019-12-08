@@ -10,6 +10,7 @@
 ## open
 
 <http://localhost:8080/users>
+
 <http://localhost:8080/users/get>
 
 response will include `X-Signature` header
