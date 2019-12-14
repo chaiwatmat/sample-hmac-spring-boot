@@ -5,6 +5,8 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 import javax.validation.Valid;
 
+import org.apache.logging.log4j.util.Timer;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -12,8 +14,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter.SseEventBuilder;
 
+import co.chaiwatm.demo.models.GenericResponse;
 import co.chaiwatm.demo.models.NotificationMessage;
+import co.chaiwatm.demo.models.RequestHeaderModel;
+import co.chaiwatm.demo.utilities.SignatureUtility;
 
 @RestController
 public class NotificationController {
@@ -24,8 +30,27 @@ public class NotificationController {
     public SseEmitter stream() throws IOException {
         SseEmitter emitter = new SseEmitter(60000L);
 
+        // java.util.Timer timer = new java.util.Timer();
+
         try {
             emitters.add(emitter);
+
+            SseEventBuilder eventBuilder = SseEmitter.event();
+
+            emitter.send(eventBuilder.data("{\"name\":\"chaiwat\"}").name("dataSet-created").id("100"));
+
+            // timer.scheduleAtFixedRate(task, delay, period);
+            // emitter.send("{\"name\":\"chaiwat\"}", MediaType.APPLICATION_JSON);
+
+            RequestHeaderModel headerModel = new RequestHeaderModel();
+            headerModel.setRequestuid("ssss");
+
+            GenericResponse response = new GenericResponse<RequestHeaderModel>();
+            response.setResponseUid("rrrrr");
+            response.setData(headerModel);
+
+            HttpHeaders headers = SignatureUtility.GetResponseHeader(response);
+
             emitter.onCompletion(() -> this.emitters.remove(emitter));
             emitter.onTimeout(() -> this.emitters.remove(emitter));
         } catch (Exception e) {
